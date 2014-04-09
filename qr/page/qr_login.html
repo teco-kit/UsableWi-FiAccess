@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<script type="text/javascript" src="captiveportal-grid.js"></script>
+<script type="text/javascript" src="captiveportal-version.js"></script>
+<script type="text/javascript" src="captiveportal-detector.js"></script>
+<script type="text/javascript" src="captiveportal-formatinf.js"></script>
+<script type="text/javascript" src="captiveportal-errorlevel.js"></script>
+<script type="text/javascript" src="captiveportal-bitmat.js"></script>
+<script type="text/javascript" src="captiveportal-datablock.js"></script>
+<script type="text/javascript" src="captiveportal-bmparser.js"></script>
+<script type="text/javascript" src="captiveportal-datamask.js"></script>
+<script type="text/javascript" src="captiveportal-rsdecoder.js"></script>
+<script type="text/javascript" src="captiveportal-gf256poly.js"></script>
+<script type="text/javascript" src="captiveportal-gf256.js"></script>
+<script type="text/javascript" src="captiveportal-decoder.js"></script>
+<script type="text/javascript" src="captiveportal-qrcode.js"></script>
+<script type="text/javascript" src="captiveportal-findpat.js"></script>
+<script type="text/javascript" src="captiveportal-alignpat.js"></script>
+<script type="text/javascript" src="captiveportal-databr.js"></script>
+
+<script type="text/javascript">
+	var mywidth = window.innerWidth;
+	var myheight = window.innerHeight;
+	var myvideo = null;
+	var mycanvas = null;
+	var myctx = null;
+	var trycounter = 0;
+	var firsttry = true;
+	var tspa = 0;
+
+	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+
+	function pageLoad()
+	{
+		if(html5support())
+		{
+			Init();
+			navigator.getUserMedia({video: true}, StreamVideo, AccessDenied);
+			qrcode.callback = Read;
+		}
+		else
+		{
+			DoNothing();
+			qrcode.callback = DoNothing;
+		}
+	}
+
+
+	function StreamVideo(stream)
+	{
+		if(!!(navigator.webkitGetUserMedia))
+		{		
+			myvideo.src=window.webkitURL.createObjectURL(stream);
+		}
+		else
+		{
+			myvideo.src=stream;
+		}
+		
+		myvideo.controls=false;
+	}
+
+
+	function AccessDenied(e)
+	{
+		alert("You have to allow camara-access before you can use QR-Login.");
+	}
+	
+	
+	function html5support()
+	{
+		return !!(navigator.getUserMedia);
+	}
+	
+	
+	function Read(data)
+	{
+		document.getElementById("ok").style.display = "inline";
+		document.getElementById("error").style.display = "none";
+		document.getElementById("loading").style.display = "none";
+		
+		var splitdata = data.split("//");
+
+		document.logform.usr.value = splitdata[0];
+		document.logform.pwd.value = splitdata[1];
+		document.logform.tsp.value = new Date().getTime() - tspa;
+		document.logform.logurl.value = document.loginform.redirurl.value;
+		document.logform.log.value = "true";
+
+		document.logform.submit();
+	}
+
+
+	function DoNothing(data)
+	{
+		alert("Your browser does not support html5 camera-access.");
+	}
+	
+	
+	function Init()
+	{
+		myvideo = document.querySelector('#capturevideo');
+		mycanvas = document.querySelector('#qr-canvas');
+		myctx = mycanvas.getContext('2d');
+
+		myvideo.width = 320;// 0.8*mywidth;
+		myvideo.height = 240;// 0.8*myheight;
+	}
+
+
+	function CaptureToCanvas()
+	{
+		if(firsttry)
+		{
+			tspa = new Date().getTime();
+			firsttry = false;
+		}
+
+		document.getElementById("ok").style.display = "none";
+		document.getElementById("error").style.display = "none";
+		document.getElementById("loading").style.display = "inline";
+		
+		mycanvas.width = myvideo.videoWidth;
+		mycanvas.height = myvideo.videoHeight;
+		myctx.drawImage(myvideo, 0, 0);
+
+		setTimeout(DoDecode, 100);
+	}
+
+
+	function DoDecode()
+	{
+		try
+		{
+			qrcode.decode();
+		}
+		catch(e)
+		{
+			if(trycounter < 10)
+			{
+				setTimeout(CaptureToCanvas, 500);
+				trycounter += 1;
+			}
+			else
+			{
+				trycounter = 0;
+				document.getElementById("ok").style.display = "none";
+				document.getElementById("error").style.display = "inline";
+				document.getElementById("loading").style.display = "none";
+			}
+			
+		}
+	}
+
+</script>
+
+<title>Loginpage</title>
+
+</head>
+
+<body onload="pageLoad()">
+
+<center>
+
+<button onclick="CaptureToCanvas()" style="width: 160px; height: 120px">QR-Login</button>
+
+<br><br>
+
+<video id="capturevideo" class="videostream" onclick="CaptureToCanvas()" autoplay></video>
+
+<br><br>
+
+Please touch the camera or button to start scanning.
+
+<br><br>
+
+<img id="loading" src="captiveportal-loading.gif" alt="loading" style="display:none" widht="100", height="100">
+<img id="ok" src="captiveportal-ok.jpg" alt="ok" style="display:none" widht="100", height="100">
+<img id="error" src="captiveportal-error.jpg" alt="error" style="display:none" widht="100", height="100">
+
+<canvas id="qr-canvas" style="display:none" width="320" height="240"></canvas>
+
+</center>
+
+<form name="loginform" method="post" action="$PORTAL_ACTION$" style="display:none">
+	<input name="auth_user" type="text" id="user">
+	<input name="auth_pass" type="password" id="pass">
+	<input name="redirurl" type="hidden" value="$PORTAL_REDIRURL$">
+	<input name="accept" type="submit" value="Login">
+</form>
+
+<form name="logform" method="post" action="captiveportal-qr_log.php" style="display:none">
+	<input name="log" type="text" id="log">
+	<input name="usr" type="text" id="usr">
+	<input name="pwd" type="password" id="pwd">
+	<input name="tsp" type="text" id="tsp">
+	<input name="logurl" type="text" id="logurl">
+	<input name="logindex" type="text" id="logindex">
+	<input name="dolog" type="submit" value="log">
+</form>
+
+
+</body>
+</html>
