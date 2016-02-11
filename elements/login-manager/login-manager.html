@@ -1,0 +1,103 @@
+<script src="../../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../elements.html">
+
+<dom-module id="login-manager">
+    <template>
+    <paper-dropdown-menu id="menuLogin">
+        <paper-menu id="changeLogin" class="dropdown-content" selected="0" on-iron-select='nextLogin'>
+            <template is="dom-repeat" items="{{options}}">
+                <paper-item role="menuitem">{{item}}</paper-item>
+            </template>
+        </paper-menu>
+    </paper-dropdown-menu>
+
+    <div id="loginMain"></div>
+    </template>
+    <script>
+        Polymer({
+            is: 'login-manager',
+            properties: {
+                url: String,
+                logins: String,
+            },
+            ready: function()
+            {
+                var opt =[];
+
+                if(!this.logins)
+                    this.logins = "simple";
+
+                if(this.url != null)
+                {
+                    var loginArray = this.logins.split(" ");
+                    var loginMain = document.getElementById('loginMain');
+
+
+                    for(var i = 0; i< loginArray.length; i++)
+                    {
+                        var loginElement = this.chooseLogin(loginArray[i]);
+
+                        if(loginElement)
+                        {
+                            var node = document.createElement("p");
+                            node.className = 'provider';
+                            node.appendChild(loginElement);
+                            node.style.display = 'none';
+                            loginMain.appendChild(node);
+
+                            opt.push(loginArray[i]);
+                        }
+                    }
+
+                    if(loginMain.getElementsByTagName("p").length == 1)
+                    {
+                        document.getElementById("menuLogin").style.display = 'none';
+                    }
+
+                    this.options = opt;
+                }
+                else
+                {
+                    alert("No URL found");
+                }
+            },
+            nextLogin: function(event, itemSelected)
+            {
+                var menu = document.getElementById("changeLogin");
+                var index = menu.indexOf(itemSelected.item);
+
+                var provider_ele = document.getElementsByClassName('provider');
+                for (var i = 0; i < provider_ele.length; ++i)
+                {
+                    var item = provider_ele[i];
+                    item.style.display = 'none';
+                }
+                var item = provider_ele[index];
+                item.style.display = 'block';
+            },
+            chooseLogin: function(provider)
+            {
+                switch(provider)
+                {
+                    case "simple": 
+                        return this.createLogin("simple-login");
+                    case "qr":
+                        return this.createLogin("qr-login");
+                    default:
+                        return;
+                }
+            },
+            createLogin: function(param)
+            {
+                var element = document.createElement(param);
+                if(element.available())
+                {
+                    element.url = this.url;
+                    return element;
+                }
+                return;
+            }
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<dom-module id="simple-login">
+    <template>
+        
+        <paper-input label="Username" type="text" value="{{username::input}}"></paper-input>
+        <paper-input label="Password" type="password" value="{{password::input}}"></paper-input>
+        <br>
+        <paper-button raised on-click="login">Login</paper-button>
+
+        <iron-ajax
+            id="ajax"
+            method="POST"
+            url="{{url}}/login"
+            dataType: 'json',
+            on-response="response">
+        </iron-ajax>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'simple-login',
+            properties: {
+                username: String,
+                password: String,
+                url: String,
+            },
+            login: function()
+            {
+                var datalist = 'username='+encodeURIComponent(this.username)+'&password='+encodeURIComponent(this.password);
+                this.$.ajax.body = datalist;
+                this.$.ajax.generateRequest();
+            },
+            response: function(res)
+            {
+                if(res.detail.response.success == 1)
+                {
+                    alert("Sucessfully logged in to the network");
+                }
+                else
+                {
+                    alert("Check the username and password and try again");
+                }
+            },
+            available: function()
+            {
+                return true;
+            }
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,146 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<dom-module id="qr-login">
+    <template>
+        <paper-button id="qr-btn" raised on-click="capture">Scan QR code</paper-button>
+        <br>
+        <canvas hidden id="qr-canvas"></canvas>
+        <video id="qr-video"></video>
+        <iron-ajax
+            id="ajax"
+            method="POST"
+            url="{{url}}/login"
+            dataType: 'json',
+            on-response="response">
+        </iron-ajax>
+    </template>
+
+    <script type="text/javascript" src="lib/grid.js"></script>
+    <script type="text/javascript" src="lib/version.js"></script>
+    <script type="text/javascript" src="lib/detector.js"></script>
+    <script type="text/javascript" src="lib/formatinf.js"></script>
+    <script type="text/javascript" src="lib/errorlevel.js"></script>
+    <script type="text/javascript" src="lib/bitmat.js"></script>
+    <script type="text/javascript" src="lib/datablock.js"></script>
+    <script type="text/javascript" src="lib/bmparser.js"></script>
+    <script type="text/javascript" src="lib/datamask.js"></script>
+    <script type="text/javascript" src="lib/gf256poly.js"></script>
+    <script type="text/javascript" src="lib/rsdecoder.js"></script>
+    <script type="text/javascript" src="lib/gf256.js"></script>
+    <script type="text/javascript" src="lib/decoder.js"></script>
+    <script type="text/javascript" src="lib/qrcode.js"></script>
+    <script type="text/javascript" src="lib/findpat.js"></script>
+    <script type="text/javascript" src="lib/alignpat.js"></script>
+    <script type="text/javascript" src="lib/databr.js"></script>
+    <script type="text/javascript" src="lib/DetectRTC.js"></script>
+    <script>
+        Polymer({
+            is: 'qr-login',
+            properties: {
+                username: String,
+                password: String,
+                url: String,
+            },
+            created: function()
+            {
+                DetectRTC.load();
+                qrcode.callback = this.login;
+            },
+            available: function()
+            {
+                return DetectRTC.hasWebcam;
+            },
+            capture: function()
+            {
+                var btn = document.getElementById('qr-btn');
+                btn.style.display = 'none';
+                this.initWebcam();
+                setInterval(this.qrDetected, 1000);
+            },
+            login: function(url)
+            {
+                var aTag =  document.createElement('a');
+                aTag.href = url;
+                var query = aTag.search.replace('?','').split('&');
+                
+                for (var i=0; i<query.length; ++i)
+                {
+                    if (!query[i])
+                        continue
+                    else
+                    {
+                        var subQuery = query[i].split('=');
+                        if(subQuery.length == 2)
+                        {
+                            if(subQuery[0] == 'username')
+                                this.username = subQuery[1];
+                            else if(subQuery[0] == 'password')
+                                this.password = subQuery[1];
+                        }
+                    }
+                }
+                if(this.username && this.password)
+                {
+                    var datalist = 'username='+encodeURIComponent(this.username)+'&password='+encodeURIComponent(this.password);
+                    ajax.body = datalist;
+                    ajax.generateRequest();
+                }
+                else
+                    alert("Invalid QR-Code");
+            },
+            response: function(res)
+            {
+                if(res.detail.response.success == 1)
+                {
+                    alert("Sucessfully logged in to the network");
+                }
+                else
+                {
+                    alert("Check the username and password and try again");
+                }
+            },
+            initWebcam: function()
+            {
+                var userMedia = navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+                if(userMedia)
+                {
+                    var constraints = {video: true, audio:false};
+                    var media = navigator.getUserMedia(constraints, function(stream){
+                        
+                        var video = document.getElementById('qr-video');
+                        var url = window.URL;
+                        video.src = url.createObjectURL(stream);
+                        video.play();
+
+                    },function(error)
+                    {
+                        console.log(error);
+                    });
+                }
+                else
+                {
+                    console.log("Error");
+                }
+            },
+            qrDetected: function()
+            {
+                var video = document.getElementById("qr-video");
+                if(video.src)
+                {
+                    var canvas = document.getElementById("qr-canvas");
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                    try
+                    {
+                        qrcode.decode();
+                    }
+                    catch(err) 
+                    {
+                        console.log(err);
+                    }
+                }
+            }
+        });
+    </script>
+</dom-module>
