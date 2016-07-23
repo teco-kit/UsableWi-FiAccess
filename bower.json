@@ -14,6 +14,7 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
+    "font-roboto": "PolymerElements/font-roboto-local#1.0.1",
     "iron-ajax": "PolymerElements/iron-ajax#~1.1.1",
     "paper-input": "PolymerElements/paper-input#~1.1.5",
     "paper-button": "PolymerElements/paper-button#~1.0.11",
