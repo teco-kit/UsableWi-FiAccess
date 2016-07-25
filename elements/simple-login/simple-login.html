@@ -10,7 +10,7 @@
         <iron-ajax
             id="ajax"
             method="POST"
-            url="{{url}}/login"
+            url="{{url}}/guest/s/default/UniFi.php"
             dataType: 'json',
             on-response="response">
         </iron-ajax>
@@ -26,15 +26,16 @@
             },
             login: function()
             {
-                var datalist = 'username='+encodeURIComponent(this.username)+'&password='+encodeURIComponent(this.password);
+                var datalist = 'username='+encodeURIComponent(this.username)+'&password='+encodeURIComponent(this.password) + '&id='+localStorage.getItem("id");;
                 this.$.ajax.body = datalist;
                 this.$.ajax.generateRequest();
             },
             response: function(res)
             {
-                if(res.detail.response.success == 1)
+                if(res.detail.response == 1)
                 {
                     alert("Sucessfully logged in to the network");
+                    window.location.assign("http://www.google.com");
                 }
                 else
                 {

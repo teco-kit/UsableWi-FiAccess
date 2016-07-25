@@ -3,8 +3,15 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="import" href="elements/login-manager/login-manager.html">
+    <script type="text/javascript">
+        function getURLParam(e) {
+            return decodeURI((new RegExp(e + "=(.+?)(&|$)").exec(location.search) || [, null])[1])
+        }
+        var id = getURLParam("id");
+        localStorage.setItem("id", id);
+    </script>
   </head>
   <body>
-    <login-manager logins="simple qr" url="http://127.0.0.1:3000"></login-manager>
+    <login-manager logins="simple qr" url="http://129.13.170.49"></login-manager>
   </body>
 </html>
