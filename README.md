@@ -18,12 +18,58 @@ You can use the components using [HTML Imports](https://www.html5rocks.com/en/tu
 The login manager provides a adaptable interfaces that checks for the availability of other login options for the Unify Example. Use it like this
 
 ```
- <login-manager logins="simple qr" url="http://unify.host"></login-manager>
+ <login-manager logins="simple qr" url="http://captive.portal"></login-manager>
 ```
 
 Login elements currently supported include:
 * QR-Code Login
 * Simple Login
+
+The module provides different authentication methods (password, QR-Code, etc) for login. Each of the authentication methods has been encapsulated in a web element that works as a HTML element.
+Using the login elements
+
+First, include the webcomponents library
+
+<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js">
+
+Next, you need to import the custom elements into the web page:
+
+<link href="elements/elements.html" rel="import">
+
+Once you've done this, if you need to use a normal login in your web project, you just use the normal login html tag
+
+```
+    <normal-login server="http://captive.portal"></normal-login>
+````
+
+Or if you want to use some QR code to login.
+
+```
+    <qr-login server="http://captive.portal"></qr-login>
+```
+
+To simplify the use of more than one authentification method, the module provides a login manager.
+
+```
+<body>
+    <login-manager server="http://captive.portal" providers="normal nfc qr"></login-manager>
+</body>
+```
+
+you only need to specify the authentication methods to be used and the module checks which methods are supported by the user's browser.
+
+Normal Login
+
+```
+[[{"fid":"60","view_mode":"wysiwyg","fields":{},"type":"media","attributes":{"height":"1056","width":"1920","class":"img-responsive media-element file-wysiwyg"}}]]
+```
+
+QR Login
+```
+[[{"fid":"61","view_mode":"default","fields":{},"type":"media","attributes":{"height":"741","width":"1366","class":"img-responsive media-element file-default"}}]]
+```
+
+
 
 This is a rewrite of the original code that also included (planned to be ported):
 * Audio context login
