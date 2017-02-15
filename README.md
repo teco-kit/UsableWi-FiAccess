@@ -4,6 +4,7 @@ UsableWi-FiAccess
 This repository contains source code for different tag and context based authentication schemes for open Wi-Fi access.  The idea of those components is to provide usable and accessible WiFi Login elements.
 
 The elements use the web components Web Components standard and can be easily included.
+
 # Installation/Usage
 
 
@@ -11,15 +12,6 @@ To pull all dependecies call ```bower install```
 
 You can use the components using [HTML Imports](https://www.html5rocks.com/en/tutorials/webcomponents/imports/)
 
-```
- <link rel="import" href="elements/login-manager/login-manager.html">
-```
-
-The login manager provides a adaptable interfaces that checks for the availability of other login options for the Unify Example. Use it like this
-
-```
- <login-manager logins="simple qr" url="http://captive.portal"></login-manager>
-```
 
 Login elements currently supported include:
 * QR-Code Login
@@ -30,17 +22,20 @@ Using the login elements
 
 First, include the webcomponents library
 
+```
 <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js">
+```
 
 Next, you need to import the custom elements into the web page:
-
+```
 <link href="elements/elements.html" rel="import">
+```
 
 Once you've done this, if you need to use a normal login in your web project, you just use the normal login html tag
 
 ```
     <normal-login server="http://captive.portal"></normal-login>
-````
+```
 
 Or if you want to use some QR code to login.
 
@@ -78,6 +73,7 @@ This is a rewrite of the original code that also included (planned to be ported)
 
 For more information read the related paper:
 http://www.teco.edu/~budde/publications/HCII2014_budde.pdf
+
 
 # Contact
 mailto:budde@teco.edu
